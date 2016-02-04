@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #====================================================================================
   # Chef Server Package Options:
   # Set to :latest to pull latest versions (doesn't cache packages)
-  chef_server_version    = '12.4.0'
+  chef_server_version    = '12.3.1'
   chef_manage_version    = '2.1.2' # Set to nil to skip installation
   chef_reporting_version = '1.5.6' # Set to nil to skip installation
   #====================================================================================
@@ -63,5 +63,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Install and configure Chef server components
   arguments = [chef_server_version.to_s, chef_manage_version.to_s, chef_reporting_version.to_s]
   config.vm.provision 'shell', path: 'scripts/install-chef-server.sh', args: arguments
+
+  # Popluate node data by bootstrapping itself
+  config.vm.provision 'shell', path: 'scripts/bootstrap-self.sh'
 
 end

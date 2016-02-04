@@ -32,6 +32,7 @@ if grep -qi "release 7." /etc/redhat-release ; then OS_VERSION="7"
 else OS_VERSION="6"
 fi
 SEP="\n===================================\n"
+STEPS="6"
 
 mkdir -p /vagrant/downloads
 cd /vagrant/downloads
@@ -65,7 +66,7 @@ reconfigure() {
 
 
 # Install the Chef server
-echo -e "${SEP}Step 1/4: Install Chef server core"
+echo -e "${SEP}Step 1/${STEPS}: Install Chef server core"
 PKG_NAME="chef-server-core-$CHEF_VERSION-1.el$OS_VERSION.x86_64.rpm"
 URL="https://web-dl.packagecloud.io/chef/stable/packages/el/$OS_VERSION/$PKG_NAME"
 if which chef-server-ctl > /dev/null 2>&1 ; then echo "(Already installed)"
@@ -79,7 +80,7 @@ fi
 
 
 # Install Chef Manage
-echo -e "${SEP}Step 2/4: Install Chef Manage"
+echo -e "${SEP}Step 2/${STEPS}: Install Chef Manage"
 if [ "$MANAGE_VERSION" = "" ] ; then echo "SKIPPED!"
 elif which chef-manage-ctl > /dev/null 2>&1 ; then echo "(Already installed)"
 elif [ "$MANAGE_VERSION" = "latest" ] ; then
@@ -98,7 +99,7 @@ fi
 
 
 # Install Chef Reporting
-echo -e "${SEP}Step 3/4: Install Chef Reporting"
+echo -e "${SEP}Step 3/${STEPS}: Install Chef Reporting"
 if [ "$REPORTING_VERSION" = "" ] ; then echo "SKIPPED!"
 elif which opscode-reporting-ctl > /dev/null 2>&1 ; then echo "(Already installed)"
 elif [ "$REPORTING_VERSION" = "latest" ] ; then
@@ -117,8 +118,27 @@ fi
 
 
 # Configure the server
-echo -e "${SEP}Step 4/4: Reconfigure the server"
+echo -e "${SEP}Step 4/${STEPS}: Reconfigure the server"
 chef-server-ctl reconfigure > /dev/null
-echo -e "DONE!\n\nServer status:"
+echo "DONE!"
 
+# Create a default user
+echo -e "${SEP}Step 5/${STEPS}: Create default user 'admin'"
+if chef-server-ctl user-list | grep -q "^admin$" ; then
+  echo "(Already created)"
+else
+  chef-server-ctl user-create admin Admin User admin.user@domain.com 'password' -f /vagrant/.chef/admin.pem
+  echo "DONE! Private key saved to /vagrant/.chef/admin.pem"
+fi
+
+# Create a default organization
+echo -e "${SEP}Step 6/${STEPS}: Create default org 'my-org'"
+if chef-server-ctl org-list | grep -q "^my-org$" ; then
+  echo "(Already created)"
+else
+  chef-server-ctl org-create my-org "my-org" -a admin -f /vagrant/.chef/my-org-validator.pem
+  echo "DONE! Admin user added to org & org validator key saved to /vagrant/.chef/my-org-validator.pem"
+fi
+
+echo -e "\n\nServer status:"
 chef-server-ctl status || echo "ERROR!"

@@ -3,3 +3,6 @@
 downloads/*
 !downloads/README.md
 starter-kits/
+*.pem
+*.tar.gz
+test-chef-server/
