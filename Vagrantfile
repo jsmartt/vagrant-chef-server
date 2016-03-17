@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #====================================================================================
   # Chef Server Package Options:
   # Set to :latest to pull latest versions (doesn't cache packages)
-  chef_server_version    = '12.3.1'
+  chef_server_version    = '12.4.1'
   chef_manage_version    = '2.1.2' # Set to nil to skip installation
   chef_reporting_version = '1.5.6' # Set to nil to skip installation
   #====================================================================================
